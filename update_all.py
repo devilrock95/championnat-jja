@@ -27,6 +27,17 @@ for script in scripts:
     else:
         print(f"✅ {script} terminé")
 
+# ==========================
+# Publication GitHub
+# ==========================
+
+print()
+print("🌍 Publication sur GitHub...")
+
+os.system("git add .")
+os.system('git commit -m "Mise à jour automatique"')
+os.system("git push")
+
 print()
 print("=" * 40)
 print("🎉 Mise à jour terminée")
