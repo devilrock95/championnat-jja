@@ -16,14 +16,23 @@ if len(dates) < 2:
 
 else:
 
-    # Les deux dernières dates
+    # Deux dernières journées
     date_hier = dates[-2]
     date_aujourdhui = dates[-1]
 
-    df_hier = df[df["Date"] == date_hier]
-    df_aujourdhui = df[df["Date"] == date_aujourdhui]
+    # Données d'hier
+    df_hier = (
+        df[df["Date"] == date_hier]
+        .drop_duplicates(subset=["Username"], keep="last")
+    )
 
-    # Fusion sur Username
+    # Données d'aujourd'hui
+    df_aujourdhui = (
+        df[df["Date"] == date_aujourdhui]
+        .drop_duplicates(subset=["Username"], keep="last")
+    )
+
+    # Fusion
     chutes = pd.merge(
         df_hier[["Username", "Prénom", "Service", "Rang"]],
         df_aujourdhui[["Username", "Rang"]],
@@ -31,16 +40,26 @@ else:
         suffixes=("_hier", "_aujourdhui")
     )
 
-    # Calcul de la perte de places
+    # Calcul des pertes de places
     chutes["Chute"] = (
         chutes["Rang_aujourdhui"]
         - chutes["Rang_hier"]
     )
 
-    # Tri du plus mauvais au moins mauvais
+    # Ne garder que les chutes
+    chutes = chutes[
+        chutes["Chute"] > 0
+    ]
+
+    # Tri du pire au moins pire
     chutes = chutes.sort_values(
         by="Chute",
         ascending=False
+    )
+
+    # Suppression des doublons
+    chutes = chutes.drop_duplicates(
+        subset=["Username"]
     )
 
     # Top 10

@@ -16,14 +16,23 @@ if len(dates) < 2:
 
 else:
 
-    # Les deux dernières dates
+    # Deux dernières journées
     date_hier = dates[-2]
     date_aujourdhui = dates[-1]
 
-    df_hier = df[df["Date"] == date_hier]
-    df_aujourdhui = df[df["Date"] == date_aujourdhui]
+    # Données d'hier (1 seule ligne par joueur)
+    df_hier = (
+        df[df["Date"] == date_hier]
+        .drop_duplicates(subset=["Username"], keep="last")
+    )
 
-    # Fusion sur Username
+    # Données d'aujourd'hui (1 seule ligne par joueur)
+    df_aujourdhui = (
+        df[df["Date"] == date_aujourdhui]
+        .drop_duplicates(subset=["Username"], keep="last")
+    )
+
+    # Fusion des deux journées
     progression = pd.merge(
         df_hier[["Username", "Prénom", "Service", "Rang"]],
         df_aujourdhui[["Username", "Rang"]],
@@ -37,10 +46,20 @@ else:
         - progression["Rang_aujourdhui"]
     )
 
-    # Tri du meilleur au moins bon
+    # Ne garder que les progressions positives
+    progression = progression[
+        progression["Progression"] > 0
+    ]
+
+    # Tri du plus gros gain au plus petit
     progression = progression.sort_values(
         by="Progression",
         ascending=False
+    )
+
+    # Sécurité supplémentaire contre les doublons
+    progression = progression.drop_duplicates(
+        subset=["Username"]
     )
 
     # Top 10
